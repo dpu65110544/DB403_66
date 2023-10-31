@@ -1,4 +1,5 @@
 <?php
+ session_start();
     require 'connect.php';
     if (isset($_POST['submit'])) {
       $studentID = $_POST['studentID'];
@@ -9,9 +10,23 @@
       student(studentID, studentName, majorID, password) 
       values('{$studentID}', '{$studentName}',
            '{$majorID}', '{$password}')";
-           echo $sql;
+         
+           try {
       $conn->query($sql);
+      $_SESSION['user'] = [
+       'studentID'=>$studentID,
+       'studentName'=>$studentName
+      ];
+      header('location:index.php');
+      exit;
     }
+    catch(mysqli_sql_exception) {
+      $err = "StudentID $studentID already exists.";
+    }
+    catch(Exception $e) {
+      $err = $e;
+    }
+  }
 ?>
 <!doctype html>
 <html lang="en">
@@ -52,6 +67,11 @@
       <form action="signup.php" method="post" onsubmit="validate()" >
       <img class="mb-4" src="images/Pringles-logo.png" alt="" width="150" >
         <h1 class="h3 mb-3 fw-normal">Please sign up</h1>
+
+        <?php 
+        if(isset($err))
+        echo "<div class='alert alert-danger'> $err</div>";
+        ?>
     
         <div class="form-floating mb-2">
           <input required name="studentID" type="text" class="form-control" id="student-id" placeholder=" ">
@@ -64,11 +84,11 @@
         <div class="form-floating mb-2">
           <select name="major" class="form-control" id="major">
 <?php
-$sql ='select * from  major order by facuity';
+$sql ='select * from  major order by faculty';
 $result = $conn->query($sql);
 while ($row = $result->fetch_assoc()) {
      echo "<option value='{$row['majorID']}'>
-    {$row['facuity']}-{$row['majorName']}
+    {$row['faculty']}-{$row['majorName']}
     </option>";   
 }
 $conn->close();
