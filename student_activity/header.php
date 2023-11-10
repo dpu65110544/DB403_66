@@ -4,7 +4,7 @@ if(!isset($_SESSION['user'])) {
     header('location:signin.php');
     exit;
 }
-require 'connect.php'
+require 'connect.php';
 ?>
 <!doctype html>
 <html lang="en">
